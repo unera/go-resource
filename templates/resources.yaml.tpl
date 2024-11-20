@@ -7,5 +7,5 @@ ignore:
  - ^resources\.yaml$
 
 # Codegenerated functions returns error (or panic)
-error: false
+use_error: false
 ...

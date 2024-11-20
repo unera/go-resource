@@ -136,10 +136,6 @@ func createDirectory(cCtx *cli.Context) error {
 	}
 
 	name := filepath.Join(dir, "resources.yaml")
-	err = os.Truncate(name, 0)
-	if err != nil {
-		return cli.Exit(err, 3)
-	}
 	err = os.WriteFile(name, R("resources.yaml.tpl"), 0644)
 	if err != nil {
 		return cli.Exit(err, 3)
@@ -157,7 +153,7 @@ func createDirectory(cCtx *cli.Context) error {
 func run(args []string) {
 	app := &cli.App{
 		Name:     "go-resource",
-		Version:  "0.0.1",
+		Version:  "0.0.2",
 		Compiled: time.Now(),
 		Authors: []*cli.Author{
 			&cli.Author{
@@ -203,3 +199,5 @@ func run(args []string) {
 func main() {
 	run(os.Args)
 }
+
+//go:generate go-resource build templates resources.go
