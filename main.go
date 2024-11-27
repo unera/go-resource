@@ -40,6 +40,7 @@ func buildGo(cCtx *cli.Context) error {
 	type kv struct {
 		Name   string
 		Value  string
+		PValue []string
 		BValue []byte
 	}
 
@@ -76,6 +77,9 @@ func buildGo(cCtx *cli.Context) error {
 	}
 
 	err = filepath.Walk(directory, func(path string, info fs.FileInfo, err error) error {
+		if info == nil {
+			return nil
+		}
 		if info.IsDir() {
 			return nil
 		}
@@ -89,6 +93,17 @@ func buildGo(cCtx *cli.Context) error {
 		dst := make([]byte, base64.StdEncoding.EncodedLen(len(value)))
 		base64.StdEncoding.Encode(dst, value)
 
+		pvalue := []string{}
+		const step = 50
+
+		for i := 0; i < len(dst); i += step {
+			if i+step < len(dst) {
+				pvalue = append(pvalue, string(dst[i:i+step]))
+			} else {
+				pvalue = append(pvalue, string(dst[i:]))
+			}
+		}
+
 		for _, re := range p.Config.Ignore {
 			matched, err := regexp.Match(re, []byte(name))
 			if err != nil {
@@ -99,7 +114,7 @@ func buildGo(cCtx *cli.Context) error {
 			}
 		}
 
-		p.Fields = append(p.Fields, kv{Name: name, Value: string(dst), BValue: value})
+		p.Fields = append(p.Fields, kv{Name: name, Value: string(dst), BValue: value, PValue: pvalue})
 		return nil
 	})
 	if err != nil {

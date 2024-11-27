@@ -1,33 +1,42 @@
 package {{ .Config.Package }}
 
 import (
+	"encoding/base64"
 	"fmt"
 )
 
-var resData = map[string][]byte{
-    {{ range .Fields }}
-	"{{ .Name }}": []byte{ {{"\n\t\t"}}
-	    {{- range $i, $v := .BValue }}
-		{{- $v | printf "%4d" }},{{ if (isWrap $i) }}{{"\n\t\t"}}{{end -}}
-	    {{ end }}
-	},
-    {{ end }}
-}
-
 // R - return resource (as blob) by name
-func R(name string) ([]byte{{ if .Config.Error }}, error{{end}}) {
+func R(name string) {{ if .Config.Error }}([]byte, error){{else}}[]byte{{end}} {
+	var b64value string
 
-	data, ok := resData[name]
+	{{- range .Fields }}
+	if name == "{{ .Name }}" {
+		b64value = "" +
+                        {{- range .PValue }}
+			"{{ . }}" +
+			{{- end }}
+			""
+		goto found			
+        }
+	{{ end }}
 
-	if !ok {
-	    {{ if .Config.Error }}
-		return nil, fmt.Errorf("Unknown resource: %s", name)
-	    {{ else }}
-		panic(fmt.Sprintf("Unknown resource: %s", name))
-	    {{ end }}
+	{{ if .Config.Error }}
+	return nil, fmt.Errorf("Resource '%s' is not found", name)
+        {{- else -}}
+	panic(fmt.Sprintf("Resource '%s' is not found", name))
+	{{- end -}}
+{{ if ne (0) (len .Fields) }}
+found:
+{{ end }}
+	{{ if .Config.Error }}
+	return base64.StdEncoding.decode(b64value)
+        {{ else }}
+	decoded, err := base64.StdEncoding.DecodeString(b64value)
+	if err != nil {
+	    panic(err.Error())
 	}
-	
-	return data{{ if .Config.Error }}, nil{{end}}
+	return decoded
+	{{ end }}
 }
 
 // Rs - return resource (as string) by name
