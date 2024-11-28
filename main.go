@@ -42,6 +42,7 @@ func buildGo(cCtx *cli.Context) error {
 		Value  string
 		PValue []string
 		BValue []byte
+		No     int
 	}
 
 	type cfg struct {
@@ -76,6 +77,7 @@ func buildGo(cCtx *cli.Context) error {
 		}
 	}
 
+	no := 1
 	err = filepath.Walk(directory, func(path string, info fs.FileInfo, err error) error {
 		if info == nil {
 			return nil
@@ -114,7 +116,9 @@ func buildGo(cCtx *cli.Context) error {
 			}
 		}
 
-		p.Fields = append(p.Fields, kv{Name: name, Value: string(dst), BValue: value, PValue: pvalue})
+		p.Fields = append(p.Fields,
+			kv{Name: name, Value: string(dst), BValue: value, PValue: pvalue, No: no})
+		no++
 		return nil
 	})
 	if err != nil {
@@ -168,7 +172,7 @@ func createDirectory(cCtx *cli.Context) error {
 func run(args []string) {
 	app := &cli.App{
 		Name:     "go-resource",
-		Version:  "0.0.2",
+		Version:  "0.0.4",
 		Compiled: time.Now(),
 		Authors: []*cli.Author{
 			&cli.Author{

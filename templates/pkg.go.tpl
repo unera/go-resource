@@ -7,33 +7,31 @@ import (
 
 // R - return resource (as blob) by name
 func R(name string) {{ if .Config.Error }}([]byte, error){{else}}[]byte{{end}} {
-	var b64value string
-
-	{{- range .Fields }}
-	if name == "{{ .Name }}" {
-		b64value = "" +
-                        {{- range .PValue }}
-			"{{ . }}" +
-			{{- end }}
-			""
-		goto found			
-        }
+	{{ range .Fields }}
+	const r{{ .No }} = "" +
+		{{- range .PValue }}
+		"{{ . }}" +
+		{{- end }}
+		""
 	{{ end }}
+	var (
+		decoded []byte
+		err     error
+	)
 
+	switch name {
+	{{- range .Fields }}
+	case "{{ .Name }}": 
+		decoded, err = base64.StdEncoding.DecodeString(r{{ .No }})
+	{{ end }}
+	default:
+		err = fmt.Errorf("Resource '%s' is not found", name)
+	}
 	{{ if .Config.Error }}
-	return nil, fmt.Errorf("Resource '%s' is not found", name)
-        {{- else -}}
-	panic(fmt.Sprintf("Resource '%s' is not found", name))
-	{{- end -}}
-{{ if ne (0) (len .Fields) }}
-found:
-{{ end }}
-	{{ if .Config.Error }}
-	return base64.StdEncoding.decode(b64value)
+	return decoded, err
         {{ else }}
-	decoded, err := base64.StdEncoding.DecodeString(b64value)
 	if err != nil {
-	    panic(err.Error())
+		panic(err.Error())
 	}
 	return decoded
 	{{ end }}
