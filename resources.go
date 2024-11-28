@@ -7,7 +7,7 @@ import (
 
 // R - return resource (as blob) by name
 func R(name string) []byte {
-
+	
 	const r1 = "" +
 		"cGFja2FnZSB7eyAuQ29uZmlnLlBhY2thZ2UgfX0KCmltcG9ydC" +
 		"AoCgkiZW5jb2RpbmcvYmFzZTY0IgoJImZtdCIKKQoKLy8gUiAt" +
@@ -36,7 +36,7 @@ func R(name string) []byte {
 		"LCBuaWwKICAgIHt7IGVsc2UgfX0KCXJldHVybiBzdHJpbmcoUi" +
 		"huYW1lKSkKICAgIHt7IGVuZCB9fQp9Cg==" +
 		""
-
+	
 	const r2 = "" +
 		"LS0tCiMgUGFja2FnZSBuYW1lIGZvciByZXN1bHQgLmdvCnBhY2" +
 		"thZ2U6IG1haW4KCiMgaWdub3JlIHBhdHRlcm5zIG9yIG5hbWVz" +
@@ -44,33 +44,33 @@ func R(name string) []byte {
 		"dlbmVyYXRlZCBmdW5jdGlvbnMgcmV0dXJucyBlcnJvciAob3Ig" +
 		"cGFuaWMpCnVzZV9lcnJvcjogZmFsc2UKLi4uCg==" +
 		""
-
+	
 	var (
 		decoded []byte
 		err     error
 	)
 
 	switch name {
-	case "pkg.go.tpl":
+	case "pkg.go.tpl": 
 		decoded, err = base64.StdEncoding.DecodeString(r1)
-
-	case "resources.yaml.tpl":
+	
+	case "resources.yaml.tpl": 
 		decoded, err = base64.StdEncoding.DecodeString(r2)
-
+	
 	default:
 		err = fmt.Errorf("Resource '%s' is not found", name)
 	}
-
+	
 	if err != nil {
 		panic(err.Error())
 	}
 	return decoded
-
+	
 }
 
 // Rs - return resource (as string) by name
-func Rs(name string) string {
-
+func Rs(name string) (string) {
+    
 	return string(R(name))
-
+    
 }
